@@ -12,7 +12,7 @@ import { WebView, WebViewNavigation } from "react-native-webview";
 
 const PRODUCTION_URI = "https://budget-buddy-v1.vercel.app/";
 const DEBUG_URI = "http://192.168.3.108:3000";
-const DEBUG_MODE = true; // This will be true when running in development mode
+const DEBUG_MODE = false; 
 
 const URI = DEBUG_MODE ? DEBUG_URI : PRODUCTION_URI;
 
