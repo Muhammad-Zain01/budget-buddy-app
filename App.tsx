@@ -9,12 +9,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { WebView, WebViewNavigation } from "react-native-webview";
+// @ts-ignore
+import * as SplashScreen from "expo-splash-screen";
 
-const PRODUCTION_URI = "https://budget-buddy-v1.vercel.app/";
-const DEBUG_URI = "http://192.168.3.108:3000";
-const DEBUG_MODE = false; 
-
-const URI = DEBUG_MODE ? DEBUG_URI : PRODUCTION_URI;
+const URI = "https://budget-buddy-v1.vercel.app/";
 
 const customUserAgent = Platform.select({
   android:
@@ -27,6 +25,22 @@ export default function App() {
   const [url, setUrl] = useState(URI);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [appIsReady, setAppIsReady] = useState(false);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
+  }, []);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
@@ -36,6 +50,12 @@ export default function App() {
 
     return () => backHandler.remove();
   }, []);
+
+  useEffect(() => {
+    if (appIsReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appIsReady]);
 
   const handleBackPress = () => {
     if (webViewRef.current) {
@@ -57,6 +77,7 @@ export default function App() {
     setIsLoading(navState.loading);
   };
 
+  // @ts-ignore
   const handleError = (syntheticEvent: WebView["onError"]) => {
     const { nativeEvent } = syntheticEvent;
     setError(`${nativeEvent.description} (${nativeEvent.code})`);
@@ -83,6 +104,10 @@ export default function App() {
       </TouchableOpacity>
     </View>
   );
+
+  if (!appIsReady) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
